@@ -44,9 +44,6 @@ public:
 
 			 librapid::fillRandom(m_layers[i].m_weight, -1.0, 1.0);
 			 librapid::fillRandom(m_layers[i].m_bias, -1.0, 1.0);
-
-			 fmt::print("{}\n", m_layers[i].m_weight);
-			 fmt::print("{}\n\n", m_layers[i].m_bias);
 		}
 	}
 
@@ -55,8 +52,13 @@ public:
 		for (size_t i = 0; i < m_layers.size() - 1; ++i) {
 			const auto &layer = m_layers[i];
 			m_layers[i + 1].m_buffer = librapid::dot(layer.m_weight, layer.m_buffer);
+			fmt::print("Weight: {}\n\n", layer.m_weight);
+			fmt::print("Buffer: {}\n\n", layer.m_buffer);
+			fmt::print("Result Buffer: {}\n\n", m_layers[i + 1].m_buffer);
 			m_layers[i + 1].m_buffer += layer.m_bias;
+			fmt::print("{}\n\n", m_layers[i + 1].m_buffer);
 			m_activation.forward(m_layers[i + 1].m_buffer, m_layers[i + 1].m_buffer);
+			fmt::print("{}\n\n\n\n\n", m_layers[i + 1].m_buffer);
 		}
 
 		return m_layers.back().m_buffer;

@@ -19,14 +19,14 @@ int main() {
 
 	fmt::print("{}\n", brain.forward(librapid::fromData<Scalar, Backend>({0.1, 0.2})));
 
-	int64_t iters = 10000;
-	auto input	  = librapid::fromData<Scalar, Backend>({0.1, 0.2});
-	double start  = librapid::now();
-	for (int64_t i = 0; i < iters; ++i) { auto res = brain.forward(input); }
-	double end = librapid::now();
+	// int64_t iters = 10000;
+	// auto input	  = librapid::fromData<Scalar, Backend>({0.1, 0.2});
+	// double start  = librapid::now();
+	// for (int64_t i = 0; i < iters; ++i) { auto res = brain.forward(input); }
+	// double end = librapid::now();
 
-	fmt::print("Elapsed: {}\n", librapid::formatTime(end - start));
-	fmt::print("Average: {}\n", librapid::formatTime((end - start) / double(iters)));
+	// fmt::print("Elapsed: {}\n", librapid::formatTime(end - start));
+	// fmt::print("Average: {}\n", librapid::formatTime((end - start) / double(iters)));
 
 	return 0;
 }
