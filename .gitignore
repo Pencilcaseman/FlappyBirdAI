@@ -9,3 +9,17 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+build
+cmake-build-debug
+cmake-build-debug-msvc
+cmake-build-release
+cmake-build-release-msvc
+cmake-build-relwithdebinfo
+cmake-build-relwithdebinfo-msvc
+cmake-build-minsize
+cmake-build-minsize-msvc
+cmake-build-minsizerel
+cmake-build-minsizerel-msvc
+cmake-build-coverage
+cmake-build-coverage-msvc
