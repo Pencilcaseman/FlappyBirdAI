@@ -3,7 +3,7 @@
 #include <librapid>
 #include <surge/surge.hpp>
 
-static constexpr double GRAVITY							= 1000;
+static constexpr double GRAVITY							= 1200;
 static constexpr int64_t NUM_BIRDS						= 10000;
 static constexpr int64_t NUM_WALLS						= 10;
 static constexpr double WALL_GAP_SIZE					= 150;
@@ -17,7 +17,7 @@ static constexpr double WALL_SPEED_DISTANCE_COEFFICIENT = 0.01;
 static double generationStartTime = 0;
 static double worldSpeed		  = 2.0;
 static int64_t generationNumber	  = 0;
-static double mutationRate		  = 0.1;
+static double mutationRate		  = 0.05;
 
 using Scalar  = float;
 using Backend = librapid::backend::CPU;

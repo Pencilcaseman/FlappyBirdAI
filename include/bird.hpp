@@ -80,7 +80,7 @@ using Bird = BirdImpl<Scalar, Backend>;
 
 Bird::BirdBrain createBirdBrain() {
 	Bird::BirdBrain brain;
-	brain << 5 << 5 << 1;
+	brain << 5 << 5 << 5 << 1;
 	brain.construct();
 	return brain;
 }
@@ -112,7 +112,7 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 	double wallDistance =
 	  librapid::map(closest.position().x() - bird.position().x(), 0, surge::window.width(), -1, 1);
 	double wallGapPosition = librapid::map(closest.size().y(), 0, surge::window.height(), -1, 1);
-	double wallVelocity = librapid::map(closest.velocity().x(), -1000, 1000, -1, 1);
+	double wallVelocity	   = librapid::map(closest.velocity().x(), -1000, 1000, -1, 1);
 
 #if 0
 
@@ -151,9 +151,8 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 
 int64_t updateBirds(std::vector<Bird> &birds, const std::vector<Wall> &walls) {
 	int64_t alive = 0;
-	int64_t index = 0;
-	for (int64_t i = 0; i < birds.size(); ++i) {
-		auto &bird = birds[i];
+	for (auto &bird : birds) {
+		if (!bird.alive()) continue;
 
 		double now			= librapid::now();
 		bird.acceleration() = librapid::Vec2d(0, GRAVITY);
