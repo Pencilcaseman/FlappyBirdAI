@@ -1,10 +1,13 @@
 #pragma once
 
+// Helper struct containing two rectangles: one for the upper wall and one for the lower wall
 struct WallRectangles {
 	surge::Rectangle upper;
 	surge::Rectangle lower;
 };
 
+// A wall which moves from right to left and has a gap in the middle. The location of the gap is
+// random and the birds must fly through it to survive.
 class Wall {
 public:
 	Wall()					= default;
@@ -23,6 +26,9 @@ public:
 	Wall &operator=(Wall &&other) = default;
 
 	[[nodiscard]] WallRectangles rectangles() const {
+		// Return two Rectangle instances. The first is the upper portion of the wall; the second
+		// is the lower portion of the wall.
+
 		return WallRectangles {
 		  surge::Rectangle(m_position, m_size),
 		  surge::Rectangle(m_position.x(),
@@ -45,9 +51,12 @@ public:
 	librapid::Vec2d &acceleration() { return m_acceleration; }
 	double &timeScale() { return m_timeScale; }
 
-	void update(double deltaTime) {
-		m_velocity += m_acceleration * deltaTime * m_timeScale;
-		m_position += m_velocity * deltaTime * m_timeScale;
+	void update() {
+		// The walls accelerate slowly as the game progresses to increase the difficulty
+
+		m_velocity += m_acceleration * m_timeScale;
+		m_velocity.x(librapid::clamp(m_velocity.x(), -MAX_WALL_SPEED, 0));
+		m_position += m_velocity * m_timeScale;
 	}
 
 	void draw(surge::Color color = surge::Color::brown) const {
@@ -65,6 +74,7 @@ private:
 	double m_timeScale;
 };
 
+// Create a new instance of a wall at a given position
 Wall createWall(double wallPosition, double wallSpeed = WALL_SPEED) {
 	auto gapPosition =
 	  librapid::random<double>(WALL_BUFFER, surge::window.height() - WALL_GAP_SIZE - WALL_BUFFER);
@@ -76,12 +86,17 @@ Wall createWall(double wallPosition, double wallSpeed = WALL_SPEED) {
 				worldSpeed);
 }
 
-void updateWalls(std::vector<Wall> &walls, double deltaTime) {
+// Update the walls and draw them
+void updateWalls(std::vector<Wall> &walls) {
 	for (auto &wall : walls) {
-		wall.update(deltaTime);
+		wall.update();
+		wall.draw();
 
-		// If the wall is off the screen, move it to the right
+		// To save memory, walls that have gone off the screen are recycled back to the far right
+		// of the screen. They're placed after the furthest wall with a gap between them to ensure
+		// the birds can actually make it through both consecutive gaps.
 		if (wall.position().x() < -WALL_WIDTH) {
+			// Find the furthest wall
 			int64_t furthestWallIndex	= 0;
 			double furthestWallDistance = 0;
 			for (int64_t i = 0; i < walls.size(); ++i) {
@@ -91,17 +106,19 @@ void updateWalls(std::vector<Wall> &walls, double deltaTime) {
 				}
 			}
 
+			// As the walls move faster, the gap between them increases to accommodate for the
+			// decreased time between successive walls.
+
 			const auto &furthest = walls[furthestWallIndex];
 			double vel			 = furthest.velocity().x();
 			double space =
 			  WALL_SPACING + WALL_WIDTH * librapid::abs(vel) * WALL_SPEED_DISTANCE_COEFFICIENT;
 			wall = createWall(furthest.position().x() + space, vel);
 		}
-
-		wall.draw();
 	}
 }
 
+// Reset all the walls and re-create them just off the screen
 void resetWalls(std::vector<Wall> &walls) {
 	int64_t numWalls = walls.size();
 	walls.clear();

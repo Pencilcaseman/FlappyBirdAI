@@ -4,7 +4,7 @@ int main() {
 	fmt::print(fmt::fg(fmt::color::orange_red) | fmt::emphasis::bold,
 			   "Welcome to the Flappy Bird AI!\n");
 
-	librapid::setNumThreads(4);
+	librapid::setNumThreads(1);
 
 #if defined(LIBRAPID_HAS_OPENCL)
 	fmt::print(fmt::fg(fmt::color::lime_green) | fmt::emphasis::bold, "OpenCL is enabled.\n");
@@ -24,6 +24,9 @@ int main() {
 	mainWindow.setFlag(surge::WindowFlag::interlaced);
 	mainWindow.setFlag(surge::WindowFlag::msaa4x);
 	mainWindow.setFlag(surge::WindowFlag::vsync);
+
+	// Note that `init` will end up drawing a single frame to the screen in order to initialize the
+	// OpenGL context. This is necessary for many functions to work properly.
 	mainWindow.init();
 
 	surge::Mouse mouse;
@@ -43,22 +46,32 @@ int main() {
 
 	// Configure each bird
 	for (auto &bird : birds) {
-		bird = createBird();
-
+		bird		 = createBird();
 		bird.brain() = createBirdBrain();
 	}
 
+	// The main loop
 	while (!mainWindow.shouldClose()) {
-		double frameTime = mainWindow.frameTime();
-
+		// Begin a drawing and clear the screen
 		mainWindow.beginDrawing();
 		mainWindow.clear(surge::Color::veryDarkGray);
 
 		// Handle inputs
 		if (mouse.isButtonPressed(surge::MouseButton::left)) { birds[0].jump(); }
 
-		updateWalls(walls, frameTime);
-		if (updateBirds(birds, walls) == 0) {
+		// Update the birds and walls
+		updateWalls(walls);
+		int64_t alive = updateBirds(birds, walls);
+
+		// Occasionally print the number of birds that are still alive
+		if (mainWindow.frameCount() % 10 == 0) {
+			fmt::print(fmt::fg(fmt::color::purple) | fmt::emphasis::bold,
+					   "Alive: {:>7} / {:>7}\r",
+					   alive,
+					   NUM_BIRDS);
+		}
+
+		if (alive == 0) {
 			// All birds are dead, so start a new generation
 			++generationNumber;
 			double generationTime = librapid::now() - generationStartTime;
@@ -87,48 +100,14 @@ int main() {
 			generationStartTime = librapid::now();
 		}
 
+		// Draw some built-in stats to the screen (Surge will support text soon, but it is not
+		// currently implemented)
+		mainWindow.drawFPS(librapid::Vec2i(20, 20));
+		mainWindow.drawFrameTime(librapid::Vec2i(20, 40));
+		mainWindow.drawTime(librapid::Vec2i(20, 60));
+
+		// End the drawing
 		mainWindow.endDrawing();
-	}
-
-	// Testing
-
-	int64_t n = 1000;
-	std::vector<std::pair<Bird::BirdBrain, double>> birdBrains;
-	auto input = librapid::Array<float>(librapid::Shape({6}));
-	librapid::fillRandom(input, -1, 1);
-	float target = 0.75f;
-
-	for (int64_t i = 0; i < n; ++i) { birdBrains.emplace_back(createBirdBrain(), 0); }
-
-	double mse = 0;
-	for (int64_t i = 0; i < n; ++i) {
-		double loss			 = std::abs(birdBrains[i].first.forward(input)(0) - target);
-		birdBrains[i].second = 1.0 / loss;
-		mse += loss * loss;
-	}
-
-	mse /= n;
-
-	fmt::print("mse: {}\n", mse);
-
-	for (int gen = 0; gen < 10; ++gen) {
-		std::vector<Bird::BirdBrain> nextGeneration = newGeneration(birdBrains);
-		// keep best
-		auto best = bestBird(birdBrains);
-		birdBrains[0].first = best.first.copy();
-
-		for (int64_t i = 0; i < n; ++i) { birdBrains[i].first = nextGeneration[i]; }
-
-		mse = 0;
-		for (int64_t i = 0; i < n; ++i) {
-			double loss			 = std::abs(birdBrains[i].first.forward(input)(0) - target);
-			birdBrains[i].second = 1.0 / loss;
-			mse += loss * loss;
-		}
-
-		mse /= n;
-
-		fmt::print("mse: {}\n", mse);
 	}
 
 	return 0;

@@ -1,5 +1,7 @@
 #pragma once
 
+// A class representing a "bird" in the game, capable of moving and jumping with a brain that
+// determines its actions
 template<typename Scalar, typename Backend>
 class BirdImpl {
 public:
@@ -43,26 +45,33 @@ public:
 	double &fitness() { return m_fitness; }
 
 	void kill(double fitness) {
-		if (!m_alive) return;
+		if (!m_alive) return; // Dead birds can't die again :P
 		m_alive	  = false;
-		m_fitness = fitness * fitness;
+		m_fitness = fitness * fitness; // Square the fitness to emphasize the importance of
+									   // surviving longer
 	}
 
-	void update(double deltaTime) {
+	void update() {
 		if (!m_alive) return;
 
-		m_velocity += m_acceleration * deltaTime * m_timeScale;
-		m_position += m_velocity * deltaTime * m_timeScale;
+		// Simple physics implementation
+		m_velocity += m_acceleration * m_timeScale;
+		m_position += m_velocity * m_timeScale;
 		m_acceleration *= 0.0;
 	}
 
 	void draw(surge::Color color = surge::Color::cyan) const {
 		if (!m_alive) return;
+
+		// Draw a solid rectangle with an outline
 		rectangle().draw(color);
 		rectangle().setThickness(5).drawLines(surge::Color::blue);
 	}
 
-	void jump() { m_velocity.y(-400.0); }
+	void jump() {
+		// To jump, we can simply set the birds velocity. A negative value points up the screen
+		m_velocity.y(-BIRD_JUMP_VELOCITY);
+	}
 
 private:
 	librapid::Vec2d m_size;
@@ -78,13 +87,17 @@ private:
 
 using Bird = BirdImpl<Scalar, Backend>;
 
+// Create a new bird brain, which is a neural network with 5 inputs and 1 output. The hidden layers
+// can be customised
 Bird::BirdBrain createBirdBrain() {
 	Bird::BirdBrain brain;
-	brain << 5 << 5 << 5 << 1;
+	brain << 5 << 8 << 1;
 	brain.construct();
 	return brain;
 }
 
+// Given a bird and a set of walls, generate the set of input values it "senses" from its
+// environment. This is then passed to the bird's brain to determine whether it should jump
 Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls) {
 	// Birds receive the following inputs:
 	// 1. The bird's height relative to the top of the screen
@@ -95,6 +108,7 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 
 	if (!bird.alive()) return {};
 
+	// Find the closest wall
 	int64_t closestWallIndex   = 0;
 	double closestWallDistance = DBL_MAX;
 	for (int64_t i = 0; i < walls.size(); ++i) {
@@ -107,40 +121,13 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 
 	const auto &closest = walls[closestWallIndex];
 
+	// Map the values into a sensible range
 	double birdHeight	= librapid::map(bird.position().y(), 0, surge::window.height(), -1, 1);
-	double birdVelocity = librapid::map(bird.velocity().y(), -1000, 1000, -1, 1);
+	double birdVelocity = librapid::map(bird.velocity().y(), -10, 10, -1, 1);
 	double wallDistance =
 	  librapid::map(closest.position().x() - bird.position().x(), 0, surge::window.width(), -1, 1);
 	double wallGapPosition = librapid::map(closest.size().y(), 0, surge::window.height(), -1, 1);
-	double wallVelocity	   = librapid::map(closest.velocity().x(), -1000, 1000, -1, 1);
-
-#if 0
-
-	// Bird height
-	surge::Line(bird.position().x(),
-				0,
-				bird.position().x(),
-				librapid::map(birdHeight, -1, 1, 0, surge::window.height()))
-	  .setThickness(5)
-	  .draw(surge::Color::red);
-
-	// Wall distance
-	surge::Line(bird.position().x(),
-				bird.position().y(),
-				librapid::map(wallDistance, -1, 1, 0, surge::window.width()) + bird.position().x(),
-				bird.position().y())
-	  .setThickness(5)
-	  .draw(surge::Color::green);
-
-	// Wall gap position
-	surge::Line(closest.position().x(),
-				0,
-				closest.position().x(),
-				librapid::map(wallGapPosition, -1, 1, 0, surge::window.height()))
-	  .setThickness(5)
-	  .draw(surge::Color::blue);
-
-#endif
+	double wallVelocity	   = librapid::map(closest.velocity().x(), -10, 10, -1, 1);
 
 	return librapid::fromData<Scalar, Backend>({static_cast<Scalar>(birdHeight),
 												static_cast<Scalar>(birdVelocity),
@@ -151,12 +138,14 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 
 int64_t updateBirds(std::vector<Bird> &birds, const std::vector<Wall> &walls) {
 	int64_t alive = 0;
+
 	for (auto &bird : birds) {
 		if (!bird.alive()) continue;
 
+		// Set the bird's acceleration so that it falls under gravity
 		double now			= librapid::now();
 		bird.acceleration() = librapid::Vec2d(0, GRAVITY);
-		bird.update(surge::window.frameTime());
+		bird.update();
 
 		// Check for collisions with the ceiling and floor
 		if (bird.position().y() < 0 ||
@@ -173,6 +162,8 @@ int64_t updateBirds(std::vector<Bird> &birds, const std::vector<Wall> &walls) {
 			}
 		}
 
+		// Assuming the bird is alive, generate a set of inputs and give it to the bird's brain.
+		// If the resulting output is greater than 0.5, the bird jumps
 		if (bird.alive()) {
 			auto inputs = generateBirdInputs(bird, walls);
 			auto output = bird.brain().forward(inputs);
@@ -182,11 +173,14 @@ int64_t updateBirds(std::vector<Bird> &birds, const std::vector<Wall> &walls) {
 		}
 	}
 
-	if (birds[0].alive()) birds[0].draw(surge::Color::red);
+	// The best bird from the previous generation is always put in the first position of the array,
+	// so draw it a different colour. It is drawn last so that it is always on top
+	birds[0].draw(surge::Color::red);
 
 	return alive;
 }
 
+// Create a default bird instance without a brain
 Bird createBird() {
 	return {librapid::Vec2d(30, 30),
 			librapid::Vec2d(50, surge::window.height() / 2),

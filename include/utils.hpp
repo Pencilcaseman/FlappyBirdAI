@@ -1,5 +1,6 @@
 #pragma once
 
+// Returns true if two rectangles are intersecting. False otherwise.
 bool rectIntersection(const surge::Rectangle &a, const surge::Rectangle &b) {
 	double x1 = a.pos().x();
 	double y1 = a.pos().y();
