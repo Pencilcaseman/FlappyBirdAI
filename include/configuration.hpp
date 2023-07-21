@@ -4,7 +4,7 @@
 #include <surge/surge.hpp>
 
 static constexpr double GRAVITY							= 0.125;			// Bird gravity
-static constexpr int64_t NUM_BIRDS						= 2000;				// Number of birds
+static constexpr int64_t NUM_BIRDS						= 2000;			// Number of birds
 static constexpr int64_t NUM_WALLS						= 10;				// Number of walls
 static constexpr double BIRD_JUMP_VELOCITY				= 5;				// Jump power
 static constexpr double WALL_GAP_SIZE					= 150;				// Opening in a wall
@@ -16,10 +16,10 @@ static constexpr double WALL_BUFFER						= 25;  // Gap will never be higher than
 static constexpr double WALL_SPEED_DISTANCE_COEFFICIENT = 1.1; // Walls move apart as they speed up
 static constexpr double MAX_WALL_SPEED					= 50;  // Fastest the walls can go
 
-static double generationStartTime = 0;	   // Time the generation started
-static double worldSpeed		  = 1;	   // Global speed modifier
-static int64_t generationNumber	  = 0;	   // Current generation number
-static double mutationRate		  = 0.075; // Learning/mutation rate
+static double generationStartTime = 0;	 // Time the generation started
+static double worldSpeed		  = 1;	 // Global speed modifier
+static int64_t generationNumber	  = 0;	 // Current generation number
+static double mutationRate		  = 0.1; // Learning/mutation rate
 
 using Scalar  = float;					// Scalar type for computations
 using Backend = librapid::backend::CPU; // Backend for librapid
