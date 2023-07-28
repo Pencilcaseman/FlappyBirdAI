@@ -55,7 +55,7 @@ public:
 		// The walls accelerate slowly as the game progresses to increase the difficulty
 
 		m_velocity += m_acceleration * m_timeScale;
-		m_velocity.x(librapid::clamp(m_velocity.x(), -MAX_WALL_SPEED, 0));
+		m_velocity.x() = librapid::clamp(m_velocity.x(), -MAX_WALL_SPEED, 0);
 		m_position += m_velocity * m_timeScale;
 	}
 
