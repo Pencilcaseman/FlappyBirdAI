@@ -70,7 +70,7 @@ public:
 
 	void jump() {
 		// To jump, we can simply set the birds velocity. A negative value points up the screen
-		m_velocity.y(-BIRD_JUMP_VELOCITY);
+		m_velocity.y() = -BIRD_JUMP_VELOCITY;
 	}
 
 private:
@@ -91,7 +91,7 @@ using Bird = BirdImpl<Scalar, Backend>;
 // can be customised
 Bird::BirdBrain createBirdBrain() {
 	Bird::BirdBrain brain;
-	brain << 5 << 5 << 1;
+	brain << 5 << 20 << 35 << 5 << 1;
 	brain.construct();
 	return brain;
 }
@@ -106,7 +106,7 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 	// 4. The y position of the next wall's gap
 	// 5. The closest wall's horizontal velocity
 
-	if (!bird.alive()) return {};
+	if (!bird.alive()) { return {}; }
 
 	// Find the closest wall
 	int64_t closestWallIndex   = 0;
@@ -140,17 +140,16 @@ int64_t updateBirds(std::vector<Bird> &birds, const std::vector<Wall> &walls) {
 	int64_t alive = 0;
 
 	for (auto &bird : birds) {
-		if (!bird.alive()) continue;
+		if (!bird.alive()) { continue; }
 
 		// Set the bird's acceleration so that it falls under gravity
-		double now			= librapid::now();
 		bird.acceleration() = librapid::Vec2d(0, GRAVITY);
 		bird.update();
 
 		// Check for collisions with the ceiling and floor
 		if (bird.position().y() < 0 ||
 			bird.position().y() + bird.size().y() > surge::window.height()) {
-			bird.kill(now - generationStartTime);
+			bird.kill(wallDistance);
 		}
 
 		// Check for collisions with the walls
@@ -158,7 +157,7 @@ int64_t updateBirds(std::vector<Bird> &birds, const std::vector<Wall> &walls) {
 			auto [upper, lower] = wall.rectangles();
 			if (rectIntersection(bird.rectangle(), upper) ||
 				rectIntersection(bird.rectangle(), lower)) {
-				bird.kill(now - generationStartTime);
+				bird.kill(wallDistance);
 			}
 		}
 

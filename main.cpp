@@ -23,7 +23,7 @@ int main() {
 	surge::Window mainWindow(librapid::Vec2i(1000, 600), "Flappy Bird AI");
 	mainWindow.setFlag(surge::WindowFlag::interlaced);
 	mainWindow.setFlag(surge::WindowFlag::msaa4x);
-	mainWindow.setFlag(surge::WindowFlag::vsync);
+	// mainWindow.setFlag(surge::WindowFlag::vsync);
 
 	// Note that `init` will end up drawing a single frame to the screen in order to initialize the
 	// OpenGL context. This is necessary for many functions to work properly.
@@ -50,6 +50,14 @@ int main() {
 		bird.brain() = createBirdBrain();
 	}
 
+	// Information about the generations and birds
+	std::vector<double> wallDistances;
+	std::vector<double> generationBirdsAlive;
+	std::vector<double> generationBirdsAliveTimes;
+
+	ImGui::SetFont(surge::Font("Cambria", 20));
+	ImGui::GetStyle().WindowPadding = {16, 12};
+
 	// The main loop
 	while (!mainWindow.shouldClose()) {
 		// Begin a drawing and clear the screen
@@ -61,14 +69,18 @@ int main() {
 
 		// Update the birds and walls
 		updateWalls(walls);
+		wallDistance += 0.1; // Arbitrary. So long as it's increasing, it's fine.
 		int64_t alive = updateBirds(birds, walls);
 
-		// Occasionally print the number of birds that are still alive
+		// Occasionally log some information about the current generation
 		if (mainWindow.frameCount() % 10 == 0) {
 			fmt::print(fmt::fg(fmt::color::purple) | fmt::emphasis::bold,
 					   "Alive: {:>7} / {:>7}\r",
 					   alive,
 					   NUM_BIRDS);
+			generationBirdsAlive.emplace_back((double)alive / (double)NUM_BIRDS);
+			generationBirdsAliveTimes.emplace_back(
+			  librapid::round(librapid::now() - generationStartTime, 1));
 		}
 
 		if (alive == 0) {
@@ -80,6 +92,8 @@ int main() {
 					   "\n\nGeneration {} lasted {}.\n",
 					   generationNumber,
 					   librapid::formatTime(generationTime));
+
+			wallDistances.emplace_back(wallDistance);
 
 			// Reset the walls before the birds, since they may collide with "ghost" walls
 			// and cause some strange bugs
@@ -97,14 +111,54 @@ int main() {
 				birds[i].brain() = nextGeneration[i];
 			}
 
+			generationBirdsAlive.clear();
+			generationBirdsAliveTimes.clear();
+
+			wallDistance		= 0;
 			generationStartTime = librapid::now();
 		}
 
-		// Draw some built-in stats to the screen (Surge will support text soon, but it is not
-		// currently implemented)
 		mainWindow.drawFPS(librapid::Vec2i(20, 20));
 		mainWindow.drawFrameTime(librapid::Vec2i(20, 40));
 		mainWindow.drawTime(librapid::Vec2i(20, 60));
+
+		ImGui::Begin("Statistics");
+		ImGui::Text("%s", fmt::format("Generation: {}", generationNumber).c_str());
+		ImGui::Text("%s", fmt::format("Alive: {}", alive).c_str());
+		ImGui::Text(
+		  "%s",
+		  fmt::format("Time: {}", librapid::formatTime(librapid::now() - generationStartTime))
+			.c_str());
+
+		if (ImPlot::BeginSubplots("", 2, 1, ImVec2(-1, -1))) {
+			ImPlot::SetNextAxesLimits(0, generationBirdsAlive.size(), 0, 1, ImPlotCond_Always);
+			if (ImPlot::BeginPlot("Birds Alive",
+								  "Time/s",
+								  "Alive %",
+								  ImVec2(0, 0),
+								  0,
+								  ImPlotAxisFlags_AutoFit,
+								  ImPlotAxisFlags_AutoFit)) {
+				ImPlot::PlotLine("Birds Alive",
+								 generationBirdsAliveTimes.data(),
+								 generationBirdsAlive.data(),
+								 generationBirdsAlive.size());
+				ImPlot::EndPlot();
+			}
+
+			if (ImPlot::BeginPlot("Survival Distance",
+								  "Generation",
+								  "Distance Travelled",
+								  ImVec2(0, 0),
+								  0,
+								  ImPlotAxisFlags_AutoFit,
+								  ImPlotAxisFlags_AutoFit)) {
+				ImPlot::PlotLine("Survival Distance", wallDistances.data(), wallDistances.size());
+				ImPlot::EndPlot();
+			}
+		}
+
+		ImGui::End();
 
 		// End the drawing
 		mainWindow.endDrawing();
