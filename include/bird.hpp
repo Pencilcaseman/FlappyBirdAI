@@ -130,7 +130,7 @@ Bird::Array generateBirdInputs(const Bird &bird, const std::vector<Wall> &walls)
 
 	return librapid::Array<Scalar, Backend>::fromData({static_cast<Scalar>(birdHeight),
 													   static_cast<Scalar>(birdVelocity),
-													   static_cast<Scalar>(wallDist),
+													   static_cast<Scalar>(wallDistance),
 													   static_cast<Scalar>(wallGapPosition),
 													   static_cast<Scalar>(wallVelocity)});
 }

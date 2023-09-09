@@ -16,7 +16,7 @@ selectParent(const std::vector<std::pair<Bird::BirdBrain, double>> &brains) {
 	// Calculate the total fitness of the generation
 	double totalFitness = 0.0;
 	for (const auto &brain : brains) { totalFitness += brain.second; }
-	auto targetFitness = librapid::random<double>(0, totalFitness);
+	auto targetFitness = librapid::random<double>(0.0, totalFitness);
 
 	// Find the bird which contains the target fitness value
 	double currentFitness = 0.0;

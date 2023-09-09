@@ -115,13 +115,13 @@ int main() {
 		mainWindow.drawFrameTime(librapid::Vec2i(20, 40));
 		mainWindow.drawTime(librapid::Vec2i(20, 60));
 
-		ImGui::Begin("Statistics");
-		ImGui::Text("%s", fmt::format("Generation: {}", generationNumber).c_str());
-		ImGui::Text("%s", fmt::format("Alive: {}", alive).c_str());
-		ImGui::Text(
-		  "%s",
-		  fmt::format("Time: {}", librapid::formatTime(librapid::now() - generationStartTime))
-			.c_str());
+		if (ImGui::Begin("Statistics")) {
+			ImGui::Text("%s", fmt::format("Generation: {}", generationNumber).c_str());
+			ImGui::Text("%s", fmt::format("Alive: {}", alive).c_str());
+			ImGui::Text(
+			  "%s",
+			  fmt::format("Time: {}", librapid::formatTime(librapid::now() - generationStartTime))
+				.c_str());
 
 		ImGui::Separator();
 
@@ -158,8 +158,6 @@ int main() {
 			ImPlot::EndSubplots();
 		}
 		ImGui::PopFont();
-
-		ImGui::End();
 
 		// End the drawing
 		mainWindow.endDrawing();
