@@ -98,13 +98,15 @@ public:
 		for (auto &layer : m_layers) {
 			for (int64_t i = 0; i < layer.m_weight.shape().size(); ++i) {
 				if (librapid::random<double>(0, 1) < learningRate) {
-					layer.m_weight.storage()[i] = librapid::random<double>(-1, 1);
+					// layer.m_weight.storage()[i] = librapid::random<double>(-1, 1);
+					layer.m_weight.storage()[i] += librapid::randomGaussian<double>();
 				}
 			}
 
 			for (int64_t i = 0; i < layer.m_bias.shape().size(); ++i) {
 				if (librapid::random<double>(0, 1) < learningRate) {
-					layer.m_bias.storage()[i] = librapid::random<double>(-1, 1);
+					// layer.m_bias.storage()[i] = librapid::random<double>(-1, 1);
+					layer.m_bias.storage()[i] += librapid::randomGaussian<double>();
 				}
 			}
 		}

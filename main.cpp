@@ -8,7 +8,7 @@ int main() {
 
 #if defined(LIBRAPID_HAS_OPENCL)
 	fmt::print(fmt::fg(fmt::color::lime_green) | fmt::emphasis::bold, "OpenCL is enabled.\n");
-	librapid::configureOpenCL(true);
+	// librapid::configureOpenCL(true);
 #else
 	fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "OpenCL is disabled.\n");
 #endif
@@ -20,25 +20,15 @@ int main() {
 #endif
 
 	// Configure the window and relevant devices
-	surge::Window mainWindow(librapid::Vec2i(1000, 600), "Flappy Bird AI");
-	mainWindow.setFlag(surge::WindowFlag::interlaced);
-	mainWindow.setFlag(surge::WindowFlag::msaa4x);
-	// mainWindow.setFlag(surge::WindowFlag::vsync);
-
-	// Note that `init` will end up drawing a single frame to the screen in order to initialize the
-	// OpenGL context. This is necessary for many functions to work properly.
-	mainWindow.init();
+	surge::Window mainWindow(librapid::Vec2i(1000, 600),
+							 "Flappy Bird AI",
+							 {surge::ConfigFlag::msaa4x, surge::ConfigFlag::interlaced});
 
 	surge::Mouse mouse;
 
 	// Configure the walls
-	std::vector<Wall> walls;
-
-	for (int64_t i = 0; i < NUM_WALLS; ++i) {
-		double wallPosition =
-		  (i == 0) ? mainWindow.width() : walls.back().position().x() + WALL_SPACING;
-		walls.emplace_back(createWall(wallPosition));
-	}
+	std::vector<Wall> walls(NUM_WALLS);
+	resetWalls(walls);
 
 	// The bird population
 	generationStartTime = librapid::now();
@@ -53,9 +43,13 @@ int main() {
 	// Information about the generations and birds
 	std::vector<double> wallDistances;
 	std::vector<double> generationBirdsAlive;
-	std::vector<double> generationBirdsAliveTimes;
+	std::vector<double> generationBirdsAliveDistance;
 
-	ImGui::SetFont(surge::Font("Cambria", 20));
+	// Style settings
+	surge::Font textFont("Arial", 20);
+	surge::Font mathFont("Cambria", 20);
+
+	ImGui::SetFont(textFont);
 	ImGui::GetStyle().WindowPadding = {16, 12};
 
 	// The main loop
@@ -78,9 +72,8 @@ int main() {
 					   "Alive: {:>7} / {:>7}\r",
 					   alive,
 					   NUM_BIRDS);
-			generationBirdsAlive.emplace_back((double)alive / (double)NUM_BIRDS);
-			generationBirdsAliveTimes.emplace_back(
-			  librapid::round(librapid::now() - generationStartTime, 1));
+			generationBirdsAlive.emplace_back(((double)alive / (double)NUM_BIRDS) * 100.0);
+			generationBirdsAliveDistance.emplace_back(wallDistance);
 		}
 
 		if (alive == 0) {
@@ -112,7 +105,7 @@ int main() {
 			}
 
 			generationBirdsAlive.clear();
-			generationBirdsAliveTimes.clear();
+			generationBirdsAliveDistance.clear();
 
 			wallDistance		= 0;
 			generationStartTime = librapid::now();
@@ -130,8 +123,15 @@ int main() {
 		  fmt::format("Time: {}", librapid::formatTime(librapid::now() - generationStartTime))
 			.c_str());
 
+		ImGui::Separator();
+
+		ImGui::SliderFloat("Learning Rate", &mutationRate, 0.0f, 0.2f);
+
+		ImGui::Separator();
+
+		ImGui::PushFont(mathFont);
 		if (ImPlot::BeginSubplots("", 2, 1, ImVec2(-1, -1))) {
-			ImPlot::SetNextAxesLimits(0, generationBirdsAlive.size(), 0, 1, ImPlotCond_Always);
+			ImPlot::SetNextAxesLimits(0, wallDistance, 0, 100, ImPlotCond_Always);
 			if (ImPlot::BeginPlot("Birds Alive",
 								  "Time/s",
 								  "Alive %",
@@ -139,10 +139,7 @@ int main() {
 								  0,
 								  ImPlotAxisFlags_AutoFit,
 								  ImPlotAxisFlags_AutoFit)) {
-				ImPlot::PlotLine("Birds Alive",
-								 generationBirdsAliveTimes.data(),
-								 generationBirdsAlive.data(),
-								 generationBirdsAlive.size());
+				ImPlot::PlotLine("Birds Alive", generationBirdsAliveDistance, generationBirdsAlive);
 				ImPlot::EndPlot();
 			}
 
@@ -153,10 +150,14 @@ int main() {
 								  0,
 								  ImPlotAxisFlags_AutoFit,
 								  ImPlotAxisFlags_AutoFit)) {
-				ImPlot::PlotLine("Survival Distance", wallDistances.data(), wallDistances.size());
+				ImPlot::PlotLine("Survival Distance", wallDistances);
+				ImPlot::PlotInfLines(
+				  "Current Distance", &wallDistance, 1, ImPlotInfLinesFlags_Horizontal);
 				ImPlot::EndPlot();
 			}
+			ImPlot::EndSubplots();
 		}
+		ImGui::PopFont();
 
 		ImGui::End();
 

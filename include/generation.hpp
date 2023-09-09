@@ -22,9 +22,7 @@ selectParent(const std::vector<std::pair<Bird::BirdBrain, double>> &brains) {
 	double currentFitness = 0.0;
 	for (const auto &brain : brains) {
 		currentFitness += brain.second;
-		if (currentFitness >= targetFitness) {
-			return brain;
-		}
+		if (currentFitness >= targetFitness) { return brain; }
 	}
 
 	return brains.back();
@@ -38,7 +36,7 @@ newGeneration(const std::vector<std::pair<Bird::BirdBrain, double>> &brains) {
 
 	for (auto &_ : brains) {
 		// Select the parent brain
-		auto parent				 = selectParent(brains);
+		auto parent = selectParent(brains);
 
 		// Copy the brain (each pair is a brain and its fitness)
 		Bird::BirdBrain newBrain = parent.first.copy();
