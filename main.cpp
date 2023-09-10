@@ -20,9 +20,10 @@ int main() {
 #endif
 
 	// Configure the window and relevant devices
-	surge::Window mainWindow(librapid::Vec2i(1000, 600),
-							 "Flappy Bird AI",
-							 {surge::ConfigFlag::msaa4x, surge::ConfigFlag::interlaced});
+	surge::Window mainWindow(
+	  librapid::Vec2i(1000, 600),
+	  "Flappy Bird AI",
+	  {surge::ConfigFlag::msaa4x, surge::ConfigFlag::interlaced, surge::ConfigFlag::vsync});
 
 	surge::Mouse mouse;
 
@@ -123,42 +124,43 @@ int main() {
 			  fmt::format("Time: {}", librapid::formatTime(librapid::now() - generationStartTime))
 				.c_str());
 
-		ImGui::Separator();
+			ImGui::Separator();
 
-		ImGui::SliderFloat("Learning Rate", &mutationRate, 0.0f, 0.2f);
+			ImGui::SliderFloat("Learning Rate", &mutationRate, 0.0f, 0.2f);
 
-		ImGui::Separator();
+			ImGui::Separator();
 
-		ImGui::PushFont(mathFont);
-		if (ImPlot::BeginSubplots("", 2, 1, ImVec2(-1, -1))) {
-			ImPlot::SetNextAxesLimits(0, wallDistance, 0, 100, ImPlotCond_Always);
-			if (ImPlot::BeginPlot("Birds Alive",
-								  "Time/s",
-								  "Alive %",
-								  ImVec2(0, 0),
-								  0,
-								  ImPlotAxisFlags_AutoFit,
-								  ImPlotAxisFlags_AutoFit)) {
-				ImPlot::PlotLine("Birds Alive", generationBirdsAliveDistance, generationBirdsAlive);
-				ImPlot::EndPlot();
+			ImGui::PushFont(mathFont);
+			if (ImPlot::BeginSubplots("", 2, 1, ImVec2(-1, -1))) {
+				ImPlot::SetNextAxesLimits(0, wallDistance, 0, 100, ImPlotCond_Always);
+				if (ImPlot::BeginPlot("Birds Alive",
+									  "Time/s",
+									  "Alive %",
+									  ImVec2(0, 0),
+									  0,
+									  ImPlotAxisFlags_AutoFit,
+									  ImPlotAxisFlags_AutoFit)) {
+					ImPlot::PlotLine(
+					  "Birds Alive", generationBirdsAliveDistance, generationBirdsAlive);
+					ImPlot::EndPlot();
+				}
+
+				if (ImPlot::BeginPlot("Survival Distance",
+									  "Generation",
+									  "Distance Travelled",
+									  ImVec2(0, 0),
+									  0,
+									  ImPlotAxisFlags_AutoFit,
+									  ImPlotAxisFlags_AutoFit)) {
+					ImPlot::PlotLine("Survival Distance", wallDistances);
+					ImPlot::PlotInfLines(
+					  "Current Distance", &wallDistance, 1, ImPlotInfLinesFlags_Horizontal);
+					ImPlot::EndPlot();
+				}
+				ImPlot::EndSubplots();
 			}
-
-			if (ImPlot::BeginPlot("Survival Distance",
-								  "Generation",
-								  "Distance Travelled",
-								  ImVec2(0, 0),
-								  0,
-								  ImPlotAxisFlags_AutoFit,
-								  ImPlotAxisFlags_AutoFit)) {
-				ImPlot::PlotLine("Survival Distance", wallDistances);
-				ImPlot::PlotInfLines(
-				  "Current Distance", &wallDistance, 1, ImPlotInfLinesFlags_Horizontal);
-				ImPlot::EndPlot();
-			}
-			ImPlot::EndSubplots();
+			ImGui::PopFont();
 		}
-		ImGui::PopFont();
-
 		// End the drawing
 		mainWindow.endDrawing();
 	}

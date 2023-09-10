@@ -90,7 +90,7 @@ using Bird = BirdImpl<Scalar, Backend>;
 // can be customised
 Bird::BirdBrain createBirdBrain() {
 	Bird::BirdBrain brain;
-	brain << 5 << 8 << 25 << 15 << 5 << 1;
+	brain << 5 << 8 << 5 << 1;
 	brain.construct();
 	return brain;
 }

@@ -41,3 +41,25 @@ F
 main.cpp,6\8\682a50d19e416195436708e48c7761923b8d6651
 I
 include/configuration.hpp,d\3\d31b08002363a2249237be1a995d1640a6779a6a
+T
+$surge/vendor/librapid/CMakeLists.txt,e\b\eb2757698030f85add6d17231bb69f7449084456
+v
+Fsurge/vendor/librapid/librapid/include/librapid/math/vectorForward.hpp,f\0\f0acd470e356b34c9bb498862d57dab278fb2c72
+B
+surge/src/font.cpp,2\1\212f448afb1ac6a2ed9a97bdd94d5785145aa2f1
+M
+surge/include/surge/surge.hpp,f\4\f48f3da8b2109c90bbac5b261bb3ee57e84b0e7e
+G
+surge/src/rectangle.cpp,9\4\94b7eca5db19cb692e7b89e6407be32e6885779c
+x
+Hsurge/vendor/librapid/librapid/include/librapid/array/arrayContainer.hpp,5\b\5b6efb9bbced32645317b64e374660c66ce44f87
+q
+Asurge/vendor/librapid/librapid/include/librapid/array/storage.hpp,e\7\e7261ebde525e7b58f0f6d1e7daa5bcd8673202d
+P
+ surge/vendor/raylib/src/config.h,c\2\c2f041005dd538f2c53b4810e7b1a50dc065b0c6
+M
+surge/compat/raylibCoreData.c,f\0\f06c129f68dd360dfea134992b82016832d761e8
+>
+CMakeLists.txt,9\a\9a2aa4db38d3115ed60da621e012c0efc0172aae
+D
+surge/src/window.cpp,1\a\1ac14b979f3f644db886dac364ed722f94ad8a6d
