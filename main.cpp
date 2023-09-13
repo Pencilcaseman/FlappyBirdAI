@@ -160,6 +160,7 @@ int main() {
 				ImPlot::EndSubplots();
 			}
 			ImGui::PopFont();
+			ImGui::End();
 		}
 		// End the drawing
 		mainWindow.endDrawing();
