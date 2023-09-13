@@ -133,30 +133,25 @@ int main() {
 			ImGui::PushFont(mathFont);
 			if (ImPlot::BeginSubplots("", 2, 1, ImVec2(-1, -1))) {
 				ImPlot::SetNextAxesLimits(0, wallDistance, 0, 100, ImPlotCond_Always);
-				if (ImPlot::BeginPlot("Birds Alive",
-									  "Time/s",
-									  "Alive %",
-									  ImVec2(0, 0),
-									  0,
-									  ImPlotAxisFlags_AutoFit,
-									  ImPlotAxisFlags_AutoFit)) {
+				if (ImPlot::BeginPlot("Birds Alive", ImVec2(0, 0))) {
+					ImPlot::SetupAxis(ImAxis_X1, "Time/s");
+					ImPlot::SetupAxis(ImAxis_Y1, "Alive %");
+
 					ImPlot::PlotLine(
 					  "Birds Alive", generationBirdsAliveDistance, generationBirdsAlive);
 					ImPlot::EndPlot();
 				}
 
-				if (ImPlot::BeginPlot("Survival Distance",
-									  "Generation",
-									  "Distance Travelled",
-									  ImVec2(0, 0),
-									  0,
-									  ImPlotAxisFlags_AutoFit,
-									  ImPlotAxisFlags_AutoFit)) {
+				if (ImPlot::BeginPlot("Survival Distance", ImVec2(0, 0))) {
+					ImPlot::SetupAxis(ImAxis_X1, "Generation", ImPlotAxisFlags_AutoFit);
+					ImPlot::SetupAxis(ImAxis_Y1, "Distance", ImPlotAxisFlags_AutoFit);
+
 					ImPlot::PlotLine("Survival Distance", wallDistances);
 					ImPlot::PlotInfLines(
 					  "Current Distance", &wallDistance, 1, ImPlotInfLinesFlags_Horizontal);
 					ImPlot::EndPlot();
 				}
+
 				ImPlot::EndSubplots();
 			}
 			ImGui::PopFont();

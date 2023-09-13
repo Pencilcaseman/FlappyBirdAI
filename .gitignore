@@ -24,7 +24,7 @@ cmake-build-minsizerel-msvc
 cmake-build-coverage
 cmake-build-coverage-msvc
 
-cmake-build-*   
+cmake-build-*
 
 .idea
 .PVS-Studio
