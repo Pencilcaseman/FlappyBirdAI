@@ -48,8 +48,8 @@ public:
 			m_layers[i].m_bias	 = Array(librapid::Shape({m_layers[i + 1].m_nodes}));
 			m_layers[i].m_buffer = Array(librapid::Shape({m_layers[i + 1].m_nodes}));
 
-			// Each weight matrix and bias vector is initialized with random values between -1 and
-			// 1.
+			// Each weight matrix and bias vector is initialized with
+			// random values between -1 and 1
 			librapid::fillRandom(m_layers[i].m_weight, -1.0, 1.0);
 			librapid::fillRandom(m_layers[i].m_bias, -1.0, 1.0);
 		}

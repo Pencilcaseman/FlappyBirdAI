@@ -8,7 +8,7 @@ int main() {
 
 #if defined(LIBRAPID_HAS_OPENCL)
 	fmt::print(fmt::fg(fmt::color::lime_green) | fmt::emphasis::bold, "OpenCL is enabled.\n");
-	// librapid::configureOpenCL(true);
+	librapid::configureOpenCL(true);
 #else
 	fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "OpenCL is disabled.\n");
 #endif
