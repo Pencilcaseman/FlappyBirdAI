@@ -2,7 +2,7 @@
 
 int main() {
 	fmt::print(fmt::fg(fmt::color::orange_red) | fmt::emphasis::bold,
-			   "Welcome to the Flappy Bird AI!\n");
+			   "Welcome to Flappy Bird AI!\n");
 
 	librapid::setNumThreads(1);
 
@@ -19,13 +19,8 @@ int main() {
 	fmt::print(fmt::fg(fmt::color::red) | fmt::emphasis::bold, "CUDA is disabled.\n");
 #endif
 
-	// Configure the window and relevant devices
-	surge::Window mainWindow(
-	  librapid::Vec2i(1000, 600),
-	  "Flappy Bird AI",
-	  {surge::ConfigFlag::msaa4x, surge::ConfigFlag::interlaced, surge::ConfigFlag::vsync});
-
-	surge::Mouse mouse;
+	// Configure the window
+	surge::Window mainWindow(librapid::Vec2i(1000, 600), "Flappy Bird AI");
 
 	// Configure the walls
 	std::vector<Wall> walls(NUM_WALLS);
@@ -58,9 +53,6 @@ int main() {
 		// Begin a drawing and clear the screen
 		mainWindow.beginDrawing();
 		mainWindow.clear(surge::Color::veryDarkGray);
-
-		// Handle inputs
-		if (mouse.isButtonPressed(surge::MouseButton::left)) { birds[0].jump(); }
 
 		// Update the birds and walls
 		updateWalls(walls);
@@ -96,6 +88,7 @@ int main() {
 			// Create the next generation of mutated bird brains
 			std::vector<std::pair<Bird::BirdBrain, double>> birdBrains;
 
+			birdBrains.reserve(birds.size());
 			for (auto &bird : birds) { birdBrains.emplace_back(bird.brain(), bird.fitness()); }
 
 			std::vector<Bird::BirdBrain> nextGeneration = newGeneration(birdBrains);
@@ -157,7 +150,6 @@ int main() {
 			ImGui::PopFont();
 			ImGui::End();
 		}
-		// End the drawing
 		mainWindow.endDrawing();
 	}
 
