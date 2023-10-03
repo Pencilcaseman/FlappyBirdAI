@@ -3,7 +3,7 @@
 #include <surge/surge.hpp>
 
 static constexpr double GRAVITY							= 0.125;			// Bird gravity
-static constexpr int64_t NUM_BIRDS						= 15000;			// Number of birds
+static constexpr int64_t NUM_BIRDS						= 5000;			// Number of birds
 static constexpr int64_t NUM_WALLS						= 10;				// Number of walls
 static constexpr double BIRD_JUMP_VELOCITY				= 4.8;				// Jump power
 static constexpr double WALL_GAP_SIZE					= 200;				// Opening in a wall
